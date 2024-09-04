@@ -1,0 +1,33 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'mr7amo0ody007@gmail.com'
+  smtp_auth_username: 'mr7amo0ody007@gmail.com'
+  smtp_auth_password: 'eokw pbnz mzes wmqc'
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+    - match:
+        severity: 'critical'
+      receiver: 'email-receiver'
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://127.0.0.1:5001/'
+  - name: 'email-receiver'
+    email_configs:
+      - to: '7amo0od2000@windowslive.com'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

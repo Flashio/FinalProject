@@ -1,0 +1,38 @@
+groups:
+- name: Allnstances
+  rules:
+  - alert: high_cpu
+    # Condition for alerting
+    expr: 90 < (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100))
+    for: 30s
+    # Annotation - additional information labels to store more information
+    annotations:
+     title: 'Alert CPU is above 70%'
+     description: 'CPU is above 70% for more than 5 seconds'
+    # Labels - additional labels to be attached to the alert
+    labels:
+     severity: 'critical'
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 70
+    for: 30s
+    labels:
+     severity: warning
+    annotations:
+     summary: "High Memory Usage Detected on {{ $labels.instance }}"
+     description: "Memory usage is above 70% ({{ $value }}%) on instance {{ $labels.instance }}."
+  - alert: HighDiskUsage
+    expr: (node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} * 100 > 70
+    for: 30s
+    labels:
+     severity: warning
+    annotations:
+     summary: "High Disk Usage Detected on {{ $labels.instance }}"
+     description: "Disk usage is above 70% ({{ $value }}%) on instance {{ $labels.instance }}."
+  - alert: HighSQLQueryLatency
+    expr: rate(mysql_global_status_queries[1m]) > 50
+    for: 30s
+    labels:
+     severity: critical
+    annotations:
+     summary: "High SQL Query Latency Detected on {{ $labels.instance }}"
+     description: "SQL query latency is above 1 second on instance {{ $labels.instance }}. Current average latency is {{ $value }} seconds."
